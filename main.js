@@ -41,7 +41,8 @@ Vue.component("product", {
       product: "Socks",
       selectedVariant: 0,
       details: ["80% cotton", "20% polyester", "Gender-neutral"],
-      variants: [{
+      variants: [
+        {
           variantId: 2234,
           variantColor: "green",
           variantImage: "./assets/vmSocks-green-onWhite_preview.jpeg",
@@ -58,10 +59,10 @@ Vue.component("product", {
     };
   },
   methods: {
-    addToCart: function () {
+    addToCart: function() {
       this.cart += 1;
     },
-    updateProduct: function (index) {
+    updateProduct: function(index) {
       this.selectedVariant = index;
     }
   },
@@ -77,9 +78,9 @@ Vue.component("product", {
     },
     shipping() {
       if (this.premium) {
-        return 'Free';
+        return "Free";
       }
-      return '2.99';
+      return "2.99";
     }
   }
 });
