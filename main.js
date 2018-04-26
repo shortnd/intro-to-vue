@@ -89,5 +89,6 @@ var app = new Vue({
   el: "#app",
   data: {
     premium: true
+    // This comment is to make a test for git on new computer
   }
 });
