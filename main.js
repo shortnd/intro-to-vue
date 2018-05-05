@@ -5,14 +5,15 @@ Vue.component("product", {
       required: true
     }
   },
-  template: `<div class="product">
+  template: `
+  <div class="product">
 
       <div class="product-image">
-        <img v-bind:src="image">
+        <img :src="image"/>
       </div>
 
       <div class="product-info">
-        <h1>{{ title }}</h1>
+        <h1>{{ product }}</h1>
         <p v-if="inStock">In Stock</p>
         <p v-else>Out of Stock</p>
         <p>Shipping: {{ shipping }}</p>
@@ -28,21 +29,29 @@ Vue.component("product", {
         </div>
 
         <button :disabled="!inStock" :class="{ disabledButton: !inStock }" @click="addToCart ">Add to Cart</button>
-
-        <div class="cart ">
-          <p>Cart({{ cart }})</p>
-        </div>
       </div>
 
-    </div>`,
+      <div>
+        <h2>Reviews:</h2>
+        <p v-if="!reviews.length">There are no reviews yet.</p>
+        <ul>
+          <li v-for="review in reviews">
+            <p>{{ review.name }}</p>
+            <p>Rating: {{ review.rating }}</p>
+            <p>{{ review.review }}</p>
+          </li>
+        </ul>
+      </div>
+    <product-review @review-submitted="addReview"></product-review>      
+    </div>
+    `,
   data() {
     return {
       brand: "Vue Mastery",
       product: "Socks",
       selectedVariant: 0,
       details: ["80% cotton", "20% polyester", "Gender-neutral"],
-      variants: [
-        {
+      variants: [{
           variantId: 2234,
           variantColor: "green",
           variantImage: "./assets/vmSocks-green-onWhite_preview.jpeg",
@@ -55,15 +64,18 @@ Vue.component("product", {
           variantQuantity: 0
         }
       ],
-      cart: 0
+      reviews: []
     };
   },
   methods: {
-    addToCart: function() {
-      this.cart += 1;
+    addToCart: function () {
+      this.$emit('add-to-cart', this.variants[this.selectedVariant].variantId);
     },
-    updateProduct: function(index) {
+    updateProduct: function (index) {
       this.selectedVariant = index;
+    },
+    addReview: function (productReview) {
+      this.reviews.push(productReview);
     }
   },
   computed: {
@@ -81,6 +93,73 @@ Vue.component("product", {
         return "Free";
       }
       return "2.99";
+    },
+  }
+});
+
+Vue.component('product-review', {
+  template: `
+  <form class="review-form" @submit.prevent="onSubmit">
+
+  <p v-if="errors.length">
+    <b>Please correct the following error(s):</b>
+    <ul>
+      <li v-for="error in errors">{{ error }}</li>
+    </ul>
+  </p>
+
+  <p>
+    <label for="name">Name:</label>
+    <input id="name" v-model="name" placeholder="name">
+  </p>
+
+  <p>
+    <label for="review">Review:</label>
+    <textarea id="review" v-model="review"></textarea>
+  </p>
+
+  <p>
+    <label for="rating">Rating:</label>
+    <select id="rating" v-model.number="rating">
+      <option>5</option>
+      <option>4</option>
+      <option>3</option>
+      <option>2</option>
+      <option>1</option>
+    </select>
+  </p>
+
+  <p>
+    <input type="submit" value="submit">
+  </p>
+  </form>
+  `,
+  data() {
+    return {
+      name: null,
+      review: null,
+      rating: null,
+      errors: []
+    };
+  },
+  methods: {
+    onSubmit() {
+      if (this.name && this.review && this.rating) {
+        let productReview = {
+          name: this.name,
+          review: this.review,
+          rating: this.rating
+        };
+        // This will send the event up to the parent
+        this.$emit('review-submitted', productReview);
+        this.name = null;
+        this.review = null;
+        this.rating = null;
+      } else {
+        if (!this.name) this.errors.push("Name required");
+        if (!this.review) this.errors.push('Review is required');
+        if (!this.rating) this.errors.push('Rating is required');
+      }
     }
   }
 });
@@ -88,6 +167,12 @@ Vue.component("product", {
 var app = new Vue({
   el: "#app",
   data: {
-    premium: true
+    premium: true,
+    cart: []
+  },
+  methods: {
+    updateCart(id) {
+      this.cart.push(id);
+    }
   }
 });
